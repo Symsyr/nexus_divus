@@ -1,0 +1,14 @@
+[database]
+username = "username"
+password = "password"
+host = "host"
+port = 5432
+db_name = "database_name"
+
+[query]
+sql = """
+    Enter
+    Your
+    query
+    Here;
+"""
