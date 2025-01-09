@@ -1,36 +1,37 @@
+// src/postgres.rs
+
 use serde::Deserialize;
 use std::fs;
 use tokio_postgres::{Client, NoTls, Error};
 
 #[derive(Deserialize)]
-struct DatabaseConfig {
-    username: String,
-    password: String,
-    host: String,
-    port: u16,
-    db_name: String,
+pub struct DatabaseConfig {
+    pub username: String,
+    pub password: String,
+    pub host: String,
+    pub port: u16,
+    pub db_name: String,
 }
 
 #[derive(Deserialize)]
-struct QueryConfig {
-    sql: String,
+pub struct QueryConfig {
+    pub sql: String,
 }
 
 #[derive(Deserialize)]
-struct Config {
-    database: DatabaseConfig,
-    query: QueryConfig,
+pub struct Config {
+    pub database: DatabaseConfig,
+    pub query: QueryConfig,
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Error> {
+pub async fn connect_and_query() -> Result<(), Error> {
     // Read the database.toml file
     let config_contents = fs::read_to_string("database.toml").expect("Unable to read file");
 
     // Parse the TOML configuration
     let config: Config = toml::from_str(&config_contents).expect("Unable to parse TOML");
 
-    // Constructing the connection string
+    // Construct the connection string
     let connection_string = format!(
         "host={} user={} password={} dbname={} port={}",
         config.database.host,
@@ -61,17 +62,18 @@ async fn main() -> Result<(), Error> {
         // Print each column and its corresponding value
         for (i, column) in columns.iter().enumerate() {
             let column_name = column.name();
-            // Get the value as a string for display purposes
+            // Get the value as an Option
             let value: Option<String> = row.try_get(i).unwrap_or_else(|_| None);
-
+            
+            // Match on the Option to format output
             match value {
-                Some(v) => println!("{}: {}", column_name, v),
-                None => println!("{}: NULL", column_name),
+                Some(v) => println!("{}: {}", column_name, v), // Print the value
+                None => println!("{}: NULL", column_name), // Indicate NULL value
             }
-            // println!("{}: {:?}", column_name, value);
         }
         println!("---"); // Separator for each row
     }
 
     Ok(())
 }
+
