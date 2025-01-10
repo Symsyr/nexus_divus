@@ -10,3 +10,6 @@ NexusDivus is a powerful ETL (Extract, Transform, Load) tool designed to streaml
 - **Automation**: Schedule and automate ETL processes to run at specified intervals.
 - **Error Handling**: Robust error handling and logging to ensure data integrity.
 - **Scalability**: Designed to handle large volumes of data efficiently.
+
+
+**Please note, this is a WIP tool and the features are not fully available**
