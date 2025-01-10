@@ -1,8 +1,6 @@
-// src/postgres.rs
-
-use serde::Deserialize;
+use tokio_postgres::Error;
 use std::fs;
-use tokio_postgres::{Client, NoTls, Error};
+use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct DatabaseConfig {
@@ -24,9 +22,9 @@ pub struct Config {
     pub query: QueryConfig,
 }
 
-pub async fn connect_and_query() -> Result<(), Error> {
-    // Read the database.toml file
-    let config_contents = fs::read_to_string("database.toml").expect("Unable to read file");
+pub async fn connect_and_query(config_path: &str) -> Result<(), Error> {
+    // Read the configuration file
+    let config_contents = fs::read_to_string(config_path).expect("Unable to read file");
 
     // Parse the TOML configuration
     let config: Config = toml::from_str(&config_contents).expect("Unable to parse TOML");
@@ -42,12 +40,13 @@ pub async fn connect_and_query() -> Result<(), Error> {
     );
 
     // Connect to the database
-    let (client, connection) = tokio_postgres::connect(&connection_string, NoTls).await?;
+    let (client, connection) = tokio_postgres::connect(&connection_string, tokio_postgres::NoTls).await?;
 
-    // Spawn a new task to handle the connection
+    // The connection object performs the actual communication with the database,
+    // so spawn it off to run on its own.
     tokio::spawn(async move {
         if let Err(e) = connection.await {
-            eprintln!("Connection error: {}", e);
+            eprintln!("connection error: {}", e);
         }
     });
 
